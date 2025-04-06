@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function GatePass() {
     const [formData, setFormData] = useState({
@@ -8,8 +9,11 @@ export default function GatePass() {
         reason: "",
         leave_date: "",
         arrival_date: "",
-        approval: "Pending",
+        approval: "PENDING",
     });
+
+    const [modal, setModal] = useState({ show: false, message: "", success: true });
+    const router = useRouter();
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -17,7 +21,7 @@ export default function GatePass() {
             const user = JSON.parse(storedUser);
             setFormData((prevData) => ({
                 ...prevData,
-                student_id: user.id || "", // Assuming 'id' is stored in user object
+                student_id: user.id || "",
             }));
         }
     }, []);
@@ -36,10 +40,30 @@ export default function GatePass() {
 
         const data = await response.json();
         if (response.ok) {
-            alert("Gate pass request submitted successfully!");
-            setFormData({ student_id: formData.student_id, reason: "", leave_date: "", arrival_date: "", approval: "Pending" });
+            setModal({
+                show: true,
+                message: "Gate pass request submitted successfully!",
+                success: true,
+            });
+
+            setFormData({
+                student_id: formData.student_id,
+                reason: "",
+                leave_date: "",
+                arrival_date: "",
+                approval: "PENDING",
+            });
+
+            // Redirect after 2 seconds
+            setTimeout(() => {
+                router.push("/Dashboard");
+            }, 2000);
         } else {
-            alert(`Error: ${data.error}`);
+            setModal({
+                show: true,
+                message: `Error: ${data.error}`,
+                success: false,
+            });
         }
     };
 
@@ -83,6 +107,25 @@ export default function GatePass() {
                     Submit Gate Pass
                 </button>
             </form>
+
+            {modal.show && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white text-black p-6 rounded-lg shadow-lg max-w-sm w-full">
+                        <h3 className={`text-lg font-semibold mb-4 ${modal.success ? "text-green-600" : "text-red-600"}`}>
+                            {modal.success ? "Success" : "Error"}
+                        </h3>
+                        <p className="mb-4">{modal.message}</p>
+                        {!modal.success && (
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                onClick={() => setModal({ ...modal, show: false })}
+                            >
+                                Close
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -162,21 +162,20 @@ export const createFeedback = async (req, res) => {
 export const createGatePass = async (req, res) => {
     try {
         const { student1_id, reason, leave_date, arrival_date, approval } = req.body;
-
-        if (!student1_id || !reason || !leave_date || !arrival_date) {
+       
+        if (!reason || !leave_date || !arrival_date) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
         const gatePass = await prisma.gatePass.create({
             data: {
-                student1_id,
+                student1_id:req.body.student_id,
                 reason,
                 leave_date: new Date(leave_date),
                 arrival_date: new Date(arrival_date),
                 approval: approval || "PENDING",
             }
         });
-
         return res.status(201).json({ message: "Gate pass request created", gatePass });
     } catch (error) {
         console.error(error);
