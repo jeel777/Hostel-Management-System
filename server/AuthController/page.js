@@ -162,6 +162,8 @@ export const completeProfile = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+
 export const createFeedback = async (req, res) => {
     try {
         const { student1_id, issue, room_number } = req.body;
@@ -219,6 +221,8 @@ export const createGatePass = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+
 export const createFeePayment = async (req, res) => {
     try {
         let { student_id, semester, date_of_payment,  mode_of_payment } = req.body;
@@ -335,6 +339,9 @@ export const getStudentGatePasses = async (req, res) => {
         return res.status(200).json(gatePasses);
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
       
 export const addStaff = async (req, res) => {
     try {
@@ -437,6 +444,45 @@ export const assignStudentsToRoom = async (req, res) => {
                 error: `Some student emails not found: ${missingEmails.join(', ')}` 
             });
         }
+        const existingAssignments = await prisma.room.findMany({
+            where: {
+                student_id: {
+                    in: students.map(s => s.id)
+                }
+            }
+        });
+
+        if (existingAssignments.length > 0) {
+            const assignedEmails = students
+                .filter(s => existingAssignments.some(a => a.student_id === s.id))
+                .map(s => s.email);
+            return res.status(400).json({ 
+                error: `Some students are already assigned to rooms: ${assignedEmails.join(', ')}` 
+            });
+        }
+
+        // Create room assignments
+        const assignments = await Promise.all(
+            students.map(student => 
+                prisma.room.create({
+                    data: {
+                        room_id,
+                        student_id: student.id
+                    }
+                })
+            )
+        );
+
+        return res.status(201).json({ 
+            message: "Students assigned to room successfully",
+            assignments
+        });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 export const getAllStaff = async (req, res) => {
     try {
@@ -545,45 +591,6 @@ export const removeCommitteeMember = async (req, res) => {
 
 
 
-        // Check if any of the students are already assigned to a room
-        const existingAssignments = await prisma.room.findMany({
-            where: {
-                student_id: {
-                    in: students.map(s => s.id)
-                }
-            }
-        });
-
-        if (existingAssignments.length > 0) {
-            const assignedEmails = students
-                .filter(s => existingAssignments.some(a => a.student_id === s.id))
-                .map(s => s.email);
-            return res.status(400).json({ 
-                error: `Some students are already assigned to rooms: ${assignedEmails.join(', ')}` 
-            });
-        }
-
-        // Create room assignments
-        const assignments = await Promise.all(
-            students.map(student => 
-                prisma.room.create({
-                    data: {
-                        room_id,
-                        student_id: student.id
-                    }
-                })
-            )
-        );
-
-        return res.status(201).json({ 
-            message: "Students assigned to room successfully",
-            assignments
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
-};
 
 export const getAdminRoomCount = async (req, res) => {
     try {
