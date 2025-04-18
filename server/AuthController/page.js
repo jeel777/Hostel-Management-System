@@ -165,21 +165,36 @@ export const completeProfile = async (req, res) => {
 export const createFeedback = async (req, res) => {
     try {
         const { student1_id, issue, room_number } = req.body;
-        
-        if (!issue || !room_number) {
+
+        if (!student1_id || !issue || !room_number) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
+        // 🔍 Check if student exists
+        const student = await prisma.student1.findUnique({
+            where: { id: parseInt(student1_id) },
+        });
+
+        if (!student) {
+            return res.status(404).json({ error: "Student not found" });
+        }
+
         const feedback = await prisma.feedback.create({
-            data: { student1_id, issue, room_number }
+            data: { 
+                student1_id: student.id, 
+                issue, 
+                room_number 
+            }
         });
 
         return res.status(201).json({ message: "Feedback submitted successfully", feedback });
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 export const createGatePass = async (req, res) => {
     try {
@@ -298,6 +313,170 @@ export const getAllFeedback = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+export const addStaff = async (req, res) => {
+    try {
+        const { name, contact_number, date_of_join, salary, gender, age, role } = req.body;
+
+        // Validate input
+        if (!name || !contact_number || !date_of_join || !salary || !gender || !age || !role) {
+            return res.status(400).json({ error: "Please fill all required fields." });
+        }
+
+        // Validate gender enum
+        const validGenders = ["MALE", "FEMALE", "OTHER"];
+        if (!validGenders.includes(gender.toUpperCase())) {
+            return res.status(400).json({ error: "Invalid gender value." });
+        }
+
+        // Validate role enum
+        const validRoles = ["MANAGER", "CLEANER", "SECURITY"];
+        if (!validRoles.includes(role.toUpperCase())) {
+            return res.status(400).json({ error: "Invalid role value." });
+        }
+
+        // Check if role already exists, otherwise create it
+        let roleRecord = await prisma.role.findFirst({
+            where: { role: role.toUpperCase() }
+        });
+
+        if (!roleRecord) {
+            roleRecord = await prisma.role.create({
+                data: {
+                    role: role.toUpperCase()
+                }
+            });
+        }
+
+        // Create staff
+        const newStaff = await prisma.staff.create({
+            data: {
+                name,
+                contact_number,
+                date_of_join: new Date(date_of_join),
+                salary: parseFloat(salary),
+                gender: gender.toUpperCase(),
+                age: parseInt(age),
+                roll_id: roleRecord.role_id
+            },
+            include: {
+                role: true
+            }
+        });
+
+        return res.status(201).json({ message: "Staff added successfully", staff: newStaff });
+    } catch (error) {
+        console.error("Error adding staff:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getAllStaff = async (req, res) => {
+    try {
+        // Fetch all staff records
+        const staff = await prisma.staff.findMany({
+            include: {
+                role: true,  // To include the role of the staff
+            }
+        });
+
+        // Send the staff data as a response
+        res.status(200).json(staff);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch staff data' });
+    }
+};
+
+export const removeStaff = async (req, res) => {
+    const { staffId } = req.params; // Get staff ID from the URL
+
+    try {
+        // Fetch the staff member by ID
+        const staffMember = await prisma.staff.findUnique({
+            where: {
+                id: parseInt(staffId) // Make sure to convert to integer if needed
+            }
+        });
+
+        if (!staffMember) {
+            return res.status(404).json({ error: 'Staff member not found' });
+        }
+
+        // Delete the staff member
+        await prisma.staff.delete({
+            where: {
+                id: parseInt(staffId)
+            }
+        });
+
+        res.status(200).json({ message: 'Staff member removed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while removing the staff member' });
+    }
+};
+
+export const addCommitteeMember = async (req, res) => {
+    try {
+        const { name, position, contact_number, date_of_join, email, gender } = req.body;
+
+        const newMember = await prisma.hostelCommittee.create({
+            data: {
+                name,
+                position,
+                contact_number,
+                date_of_join: new Date(date_of_join),
+                email,
+                gender
+            }
+        });
+
+        res.status(201).json(newMember);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to add committee member' });
+    }
+};
+
+export const getCommitteeMembers = async (req, res) => {
+    try {
+        const members = await prisma.hostelCommittee.findMany({
+            orderBy: {
+                date_of_join: 'asc'
+            }
+        });
+        res.status(200).json(members);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch committee members' });
+    }
+};
+
+export const removeCommitteeMember = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const existingMember = await prisma.hostelCommittee.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!existingMember) {
+            return res.status(404).json({ error: 'Committee member not found' });
+        }
+
+        await prisma.hostelCommittee.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.status(200).json({ message: 'Committee member removed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to remove committee member' });
+    }
+};
+
+
 
 
 
