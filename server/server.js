@@ -1,5 +1,5 @@
 import express from "express";
-import routes from "./Routes/page.js"; // Ensure correct path and file extension
+import routes from "./routes/page.js"; // Ensure correct path and file extension
 import cors from "cors";
 
 const app = express();
