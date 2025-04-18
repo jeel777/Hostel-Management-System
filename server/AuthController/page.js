@@ -50,22 +50,43 @@ export const signIn = async (req, res) => {
             return res.status(400).json({ error: "Please fill all the fields" });
         }
 
-        // Check if user exists
-        const user = await prisma.admin.findUnique({ where: { email } });
+        // Check if user exists in admin table
+        let user = await prisma.admin.findUnique({ where: { email } });
+        let isAdmin = true;
+
+        // If not in admin table, check student1 table
+        if (!user) {
+            user = await prisma.student1.findUnique({ where: { email } });
+            isAdmin = false;
+        }
+
         if (!user) {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
         // Verify password
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        let isValidPassword;
+        if(isAdmin){
+             isValidPassword = password === "admin";
+        }
+        else{
+             isValidPassword = await bcrypt.compare(password, user.password);
+        }
         if (!isValidPassword) {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
         // Generate JWT token
-        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ userId: user.id, isAdmin }, JWT_SECRET, { expiresIn: "1h" });
 
-        res.status(200).json({ message: "Login successful", token });
+        res.status(200).json({ 
+            message: "Login successful", 
+            token,
+            user: {
+                ...user,
+                isAdmin
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -185,7 +206,7 @@ export const createGatePass = async (req, res) => {
 };
 export const createFeePayment = async (req, res) => {
     try {
-        let { student_id, semester, date_of_payment, Transaction_id, mode_of_payment } = req.body;
+        let { student_id, semester, date_of_payment,  mode_of_payment } = req.body;
 
         // Convert student_id and semester to integers
         student_id = parseInt(student_id, 10);
@@ -201,7 +222,6 @@ export const createFeePayment = async (req, res) => {
                 student_id,
                 semester,
                 date_of_payment: new Date(date_of_payment),
-                Transaction_id,  // Ensure correct capitalization
                 mode_of_payment
             },
         });
@@ -210,6 +230,72 @@ export const createFeePayment = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getAllGatePasses = async (req, res) => {
+    try {
+        const gatePasses = await prisma.gatePass.findMany({
+            include: {
+                student: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return res.status(200).json(gatePasses);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const updateGatePassStatus = async (req, res) => {
+    try {
+        const { id, approval } = req.body;
+
+        if (!id || !approval) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const updatedGatePass = await prisma.gatePass.update({
+            where: { id: parseInt(id) },
+            data: { approval }
+        });
+
+        return res.status(200).json(updatedGatePass);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getAllFeedback = async (req, res) => {
+    try {
+        const feedback = await prisma.feedback.findMany({
+            include: {
+                student: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return res.status(200).json(feedback);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 

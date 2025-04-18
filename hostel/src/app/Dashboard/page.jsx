@@ -11,16 +11,23 @@ export default function Dashboard() {
         const storedUser = localStorage.getItem("user");
         if (!storedUser) {
             router.push("/");
-        } else {
-            setUser(JSON.parse(storedUser));
+            return;
         }
+
+        const user = JSON.parse(storedUser);
+        if (user.isAdmin) {
+            router.push("/AdminDashboard");
+            return;
+        }
+
+        setUser(user);
     }, [router]);
 
     return (
         <div className="min-h-screen flex flex-col items-center p-4 bg-gray-900 text-white">
             {/* Navbar */}
             <nav className="w-full bg-gray-800 p-4 flex justify-between items-center shadow-md">
-                <h1 className="text-2xl font-bold">Dashboard</h1>
+                <h1 className="text-2xl font-bold">Student Dashboard</h1>
                 <button
                     onClick={() => {
                         localStorage.removeItem("user");
@@ -35,7 +42,7 @@ export default function Dashboard() {
             {/* Welcome Message */}
             <div className="mt-8 w-full max-w-4xl bg-gray-800 p-6 rounded-lg shadow-lg text-center">
                 <h2 className="text-3xl font-semibold">
-                    Welcome, {user ? user.email : "User"}!
+                    Welcome, {user ? user.name : "Student"}!
                 </h2>
             </div>
 
