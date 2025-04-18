@@ -25,7 +25,14 @@ export default function SigninForm() {
             const data = await response.json();
             if (response.ok) {
                 setMessage('Signin successful!');
-                router.push('/dashboard'); // Redirect to Dashboard
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Redirect based on user type
+                if (data.user.isAdmin) {
+                    router.push('/AdminDashboard');
+                } else {
+                    router.push('/Dashboard');
+                }
             } else {
                 setMessage(data.error || 'Signin failed');
             }
