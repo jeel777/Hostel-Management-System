@@ -83,6 +83,24 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-bold">Manage Mess Menu</h3>
                     <p className="text-gray-300">Add or update weekly menu items.</p>
                 </div>
+
+                {/* View Rooms */}
+                <div
+                    onClick={() => router.push("/ViewRooms")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Rooms</h3>
+                    <p className="text-gray-300">View room assignments and student details.</p>
+                </div>
+
+                {/* View Mess Menu */}
+                <div
+                    onClick={() => router.push("/AdminViewMessMenu")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Mess Menu</h3>
+                    <p className="text-gray-300">View the current weekly menu.</p>
+                </div>
             </div>
         </div>
     );

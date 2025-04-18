@@ -479,5 +479,50 @@ export const getMessMenu = async (req, res) => {
     }
 };
 
+export const getRoomAssignments = async (req, res) => {
+    try {
+        const rooms = await prisma.room.findMany({
+            include: {
+                student: {
+                    include: {
+                        student2: true
+                    }
+                }
+            }
+        });
+
+        // Group rooms by room_id
+        const groupedRooms = rooms.reduce((acc, room) => {
+            if (!acc[room.room_id]) {
+                acc[room.room_id] = {
+                    room_id: room.room_id,
+                    students: []
+                };
+            }
+            
+            if (room.student) {
+                acc[room.room_id].students.push({
+                    name: room.student.name,
+                    email: room.student.email,
+                    mobile_number: room.student.student2?.mobile_number,
+                    address: room.student.student2?.address,
+                    emergency_number: room.student.student2?.emergency_number,
+                    parent_contact: room.student.student2?.parent_contact
+                });
+            }
+            
+            return acc;
+        }, {});
+
+        // Convert the grouped object to an array
+        const formattedRooms = Object.values(groupedRooms);
+
+        return res.status(200).json(formattedRooms);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 
 
