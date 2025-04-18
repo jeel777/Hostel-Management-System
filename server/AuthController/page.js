@@ -180,6 +180,7 @@ export const createFeedback = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 export const createGatePass = async (req, res) => {
     try {
         const { student1_id, reason, leave_date, arrival_date, approval } = req.body;
@@ -190,7 +191,7 @@ export const createGatePass = async (req, res) => {
 
         const gatePass = await prisma.gatePass.create({
             data: {
-                student1_id:req.body.student_id,
+                student1_id,
                 reason,
                 leave_date: new Date(leave_date),
                 arrival_date: new Date(arrival_date),
