@@ -92,7 +92,6 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-bold">View Rooms</h3>
                     <p className="text-gray-300">View room assignments and student details.</p>
                 </div>
-
                 {/* View Mess Menu */}
                 <div
                     onClick={() => router.push("/AdminViewMessMenu")}
@@ -100,6 +99,41 @@ export default function AdminDashboard() {
                 >
                     <h3 className="text-lg font-bold">View Mess Menu</h3>
                     <p className="text-gray-300">View the current weekly menu.</p>
+                </div>
+                <div
+                    onClick={() => router.push("/viewHostelCommitteMembers")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Hostel Committee Members</h3>
+                    <p className="text-gray-300">View Hostel Committee Members</p>
+                </div>
+                <div
+                    onClick={() => router.push("/removeCommitteMembers")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">Remove Hostel Committee Members</h3>
+                    <p className="text-gray-300">Remove Hostel Committee Members</p>
+                </div>
+                <div
+                    onClick={() => router.push("/addHostelCommitteMembers")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">Add Hostel Committee Members</h3>
+                    <p className="text-gray-300">Add Hostel Committee Members</p>
+                </div>
+                <div
+                    onClick={() => router.push("/seeStaff")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Staff Members</h3>
+                    <p className="text-gray-300">View Staff Members</p>
+                </div>
+                <div
+                    onClick={() => router.push("/addStaff")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">Add Staff Members</h3>
+                    <p className="text-gray-300">Add Staff Members</p>
                 </div>
             </div>
         </div>

@@ -92,6 +92,13 @@ export default function Dashboard() {
                     <h3 className="text-lg font-bold">View Mess Menu</h3>
                     <p className="text-gray-300">Check weekly menu items.</p>
                 </div>
+                <div
+                    onClick={() => router.push("/viewHostelCommitteMembers")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Hostel Committee Members</h3>
+                    <p className="text-gray-300">View Hostel Committee Members</p>
+                </div>
             </div>
         </div>
     );
