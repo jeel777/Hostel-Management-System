@@ -47,7 +47,7 @@ export default function Dashboard() {
             </div>
 
             {/* Dashboard Sections */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl">
                 {/* Feedback Section */}
                 <div
                     onClick={() => router.push("/Feedback")}
@@ -66,6 +66,15 @@ export default function Dashboard() {
                     <p className="text-gray-300">Request permission for leaving.</p>
                 </div>
 
+                {/* View Gate Passes Section */}
+                <div
+                    onClick={() => router.push("/ViewGatePasses")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Gate Passes</h3>
+                    <p className="text-gray-300">View your gate pass requests.</p>
+                </div>
+
                 {/* Fee Payment Section */}
                 <div
                     onClick={() => router.push("/FeePayment")}
@@ -73,6 +82,15 @@ export default function Dashboard() {
                 >
                     <h3 className="text-lg font-bold">Fee Payment</h3>
                     <p className="text-gray-300">Submit the Fee details Here</p>
+                </div>
+
+                {/* View Mess Menu Section */}
+                <div
+                    onClick={() => router.push("/ViewMessMenu")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">View Mess Menu</h3>
+                    <p className="text-gray-300">Check weekly menu items.</p>
                 </div>
             </div>
         </div>

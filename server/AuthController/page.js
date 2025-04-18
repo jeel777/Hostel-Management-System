@@ -314,6 +314,28 @@ export const getAllFeedback = async (req, res) => {
     }
 };
 
+
+export const getStudentGatePasses = async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        
+        if (!studentId) {
+            return res.status(400).json({ error: "Student ID is required" });
+        }
+
+        const gatePasses = await prisma.gatePass.findMany({
+            where: {
+                student1_id: parseInt(studentId)
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return res.status(200).json(gatePasses);
+    } catch (error) {
+        console.error(error);
+      
 export const addStaff = async (req, res) => {
     try {
         const { name, contact_number, date_of_join, salary, gender, age, role } = req.body;
@@ -367,9 +389,54 @@ export const addStaff = async (req, res) => {
         return res.status(201).json({ message: "Staff added successfully", staff: newStaff });
     } catch (error) {
         console.error("Error adding staff:", error);
+
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+
+export const assignStudentsToRoom = async (req, res) => {
+    try {
+        const { room_id, student_emails } = req.body;
+        
+        if (!room_id || !student_emails || !Array.isArray(student_emails)) {
+            return res.status(400).json({ error: "Room ID and student emails are required" });
+        }
+
+        // Get admin's room count limit
+        const admin = await prisma.admin.findFirst();
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found" });
+        }
+
+        // Check if the number of students exceeds the room count limit
+        if (student_emails.length > admin.room_count) {
+            return res.status(400).json({ 
+                error: `Cannot assign more than ${admin.room_count} students to a room` 
+            });
+        }
+
+        // Find students by email and get their IDs
+        const students = await prisma.student1.findMany({
+            where: {
+                email: {
+                    in: student_emails
+                }
+            },
+            select: {
+                id: true,
+                email: true
+            }
+        });
+
+        // Check if all emails were found
+        if (students.length !== student_emails.length) {
+            const foundEmails = students.map(s => s.email);
+            const missingEmails = student_emails.filter(email => !foundEmails.includes(email));
+            return res.status(400).json({ 
+                error: `Some student emails not found: ${missingEmails.join(', ')}` 
+            });
+        }
 
 export const getAllStaff = async (req, res) => {
     try {
@@ -478,8 +545,163 @@ export const removeCommitteeMember = async (req, res) => {
 
 
 
+        // Check if any of the students are already assigned to a room
+        const existingAssignments = await prisma.room.findMany({
+            where: {
+                student_id: {
+                    in: students.map(s => s.id)
+                }
+            }
+        });
 
+        if (existingAssignments.length > 0) {
+            const assignedEmails = students
+                .filter(s => existingAssignments.some(a => a.student_id === s.id))
+                .map(s => s.email);
+            return res.status(400).json({ 
+                error: `Some students are already assigned to rooms: ${assignedEmails.join(', ')}` 
+            });
+        }
 
+        // Create room assignments
+        const assignments = await Promise.all(
+            students.map(student => 
+                prisma.room.create({
+                    data: {
+                        room_id,
+                        student_id: student.id
+                    }
+                })
+            )
+        );
+
+        return res.status(201).json({ 
+            message: "Students assigned to room successfully",
+            assignments
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getAdminRoomCount = async (req, res) => {
+    try {
+        const admin = await prisma.admin.findFirst();
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found" });
+        }
+
+        return res.status(200).json({ room_count: admin.room_count });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const createMessMenu = async (req, res) => {
+    try {
+        const { day, meal_type, items } = req.body;
+        
+        if (!day || !meal_type || !items) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+        const validDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const validMealTypes = ["Breakfast", "Lunch", "Hi-Tea", "Dinner"];
+
+        if (!validDays.includes(day)) {
+            return res.status(400).json({ error: "Invalid day" });
+        }
+
+        if (!validMealTypes.includes(meal_type)) {
+            return res.status(400).json({ error: "Invalid meal type" });
+        }
+
+        const messMenu = await prisma.messMenu.create({
+            data: {
+                day,
+                meal_type,
+                items
+            }
+        });
+
+        return res.status(201).json({ message: "Menu item added successfully", messMenu });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getMessMenu = async (req, res) => {
+    try {
+        const messMenu = await prisma.messMenu.findMany({
+            orderBy: [
+                { day: 'asc' },
+                { meal_type: 'asc' }
+            ]
+        });
+
+        // Group menu items by day and meal type
+        const groupedMenu = {};
+        messMenu.forEach(item => {
+            if (!groupedMenu[item.day]) {
+                groupedMenu[item.day] = {};
+            }
+            groupedMenu[item.day][item.meal_type] = item.items.split(',').map(item => item.trim());
+        });
+
+        return res.status(200).json(groupedMenu);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getRoomAssignments = async (req, res) => {
+    try {
+        const rooms = await prisma.room.findMany({
+            include: {
+                student: {
+                    include: {
+                        student2: true
+                    }
+                }
+            }
+        });
+
+        // Group rooms by room_id
+        const groupedRooms = rooms.reduce((acc, room) => {
+            if (!acc[room.room_id]) {
+                acc[room.room_id] = {
+                    room_id: room.room_id,
+                    students: []
+                };
+            }
+            
+            if (room.student) {
+                acc[room.room_id].students.push({
+                    name: room.student.name,
+                    email: room.student.email,
+                    mobile_number: room.student.student2?.mobile_number,
+                    address: room.student.student2?.address,
+                    emergency_number: room.student.student2?.emergency_number,
+                    parent_contact: room.student.student2?.parent_contact
+                });
+            }
+            
+            return acc;
+        }, {});
+
+        // Convert the grouped object to an array
+        const formattedRooms = Object.values(groupedRooms);
+
+        return res.status(200).json(formattedRooms);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 
 
