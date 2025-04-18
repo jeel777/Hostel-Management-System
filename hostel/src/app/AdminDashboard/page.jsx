@@ -47,7 +47,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Admin Dashboard Sections */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl">
                 {/* Manage Gate Passes */}
                 <div
                     onClick={() => router.push("/ManageGatePasses")}
@@ -66,13 +66,22 @@ export default function AdminDashboard() {
                     <p className="text-gray-300">Review student feedback and complaints.</p>
                 </div>
 
-                {/* Manage Students */}
+                {/* Assign Room */}
                 <div
-                    onClick={() => router.push("/ManageStudents")}
+                    onClick={() => router.push("/AssignRoom")}
                     className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
                 >
-                    <h3 className="text-lg font-bold">Manage Students</h3>
-                    <p className="text-gray-300">View and manage student information.</p>
+                    <h3 className="text-lg font-bold">Assign Room</h3>
+                    <p className="text-gray-300">Assign students to rooms.</p>
+                </div>
+
+                {/* Manage Mess Menu */}
+                <div
+                    onClick={() => router.push("/MessMenu")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">Manage Mess Menu</h3>
+                    <p className="text-gray-300">Add or update weekly menu items.</p>
                 </div>
             </div>
         </div>
