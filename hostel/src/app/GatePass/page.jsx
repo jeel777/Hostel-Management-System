@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function GatePass() {
     const [formData, setFormData] = useState({
-        student_id: "",
+        student1_id: "",
         reason: "",
         leave_date: "",
         arrival_date: "",
@@ -21,7 +21,8 @@ export default function GatePass() {
             const user = JSON.parse(storedUser);
             setFormData((prevData) => ({
                 ...prevData,
-                student_id: user.id || "",
+                student1_id: user.id || "", // Using id from user object as student1_id
+
             }));
         }
     }, []);
@@ -32,6 +33,12 @@ export default function GatePass() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!formData.student1_id) {
+            alert("Student ID is required. Please log in again.");
+            return;
+        }
+
         const response = await fetch("http://localhost:5000/api/createGatePass", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -40,24 +47,11 @@ export default function GatePass() {
 
         const data = await response.json();
         if (response.ok) {
-            setModal({
-                show: true,
-                message: "Gate pass request submitted successfully!",
-                success: true,
-            });
 
-            setFormData({
-                student_id: formData.student_id,
-                reason: "",
-                leave_date: "",
-                arrival_date: "",
-                approval: "PENDING",
-            });
+            alert("Gate pass request submitted successfully!");
+            setFormData({ student1_id: formData.student1_id, reason: "", leave_date: "", arrival_date: "", approval: "Pending" });
 
-            // Redirect after 2 seconds
-            setTimeout(() => {
-                router.push("/Dashboard");
-            }, 2000);
+           
         } else {
             setModal({
                 show: true,
@@ -73,8 +67,8 @@ export default function GatePass() {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                     type="text"
-                    name="student_id"
-                    value={formData.student_id}
+                    name="student1_id"
+                    value={formData.student1_id}
                     readOnly
                     className="w-full p-2 rounded bg-gray-700 text-white cursor-not-allowed"
                 />
