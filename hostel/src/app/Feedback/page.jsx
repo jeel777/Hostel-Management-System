@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Feedback() {
     const [formData, setFormData] = useState({
@@ -9,13 +10,16 @@ export default function Feedback() {
         room_number: "",
     });
 
+    const [modal, setModal] = useState({ show: false, message: "", success: true });
+    const router = useRouter();
+
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const user = JSON.parse(storedUser);
             setFormData((prevData) => ({
                 ...prevData,
-                student1_id: user.id || "", // Assuming 'id' is stored in user object
+                student1_id: user.id || "",
             }));
         }
     }, []);
@@ -34,10 +38,28 @@ export default function Feedback() {
 
         const data = await response.json();
         if (response.ok) {
-            alert("Feedback submitted successfully!");
-            setFormData({ student1_id: formData.student1_id, issue: "", room_number: "" });
+            setModal({
+                show: true,
+                message: "Feedback submitted successfully!",
+                success: true,
+            });
+
+            setFormData({
+                student1_id: formData.student1_id,
+                issue: "",
+                room_number: "",
+            });
+
+            // Auto-redirect to dashboard after 2 seconds
+            setTimeout(() => {
+                router.push("/Dashboard");
+            }, 2000);
         } else {
-            alert(`Error: ${data.error}`);
+            setModal({
+                show: true,
+                message: `Error: ${data.error}`,
+                success: false,
+            });
         }
     };
 
@@ -74,6 +96,25 @@ export default function Feedback() {
                     Submit Feedback
                 </button>
             </form>
+
+            {modal.show && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white text-black p-6 rounded-lg shadow-lg max-w-sm w-full">
+                        <h3 className={`text-lg font-semibold mb-4 ${modal.success ? "text-green-600" : "text-red-600"}`}>
+                            {modal.success ? "Success" : "Error"}
+                        </h3>
+                        <p className="mb-4">{modal.message}</p>
+                        {!modal.success && (
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                onClick={() => setModal({ ...modal, show: false })}
+                            >
+                                Close
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

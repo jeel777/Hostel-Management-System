@@ -72,7 +72,7 @@ export default function Dashboard() {
                     className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
                 >
                     <h3 className="text-lg font-bold">Fee Payment</h3>
-                    <p className="text-gray-300">Make your fee payment online.</p>
+                    <p className="text-gray-300">Submit the Fee details Here</p>
                 </div>
             </div>
         </div>

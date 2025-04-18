@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SignupForm() {
-    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+export default function SigninForm() {
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -18,7 +18,7 @@ export default function SignupForm() {
         setMessage('');
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/signup', {
+            const response = await fetch('http://localhost:5000/api/signin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -26,15 +26,13 @@ export default function SignupForm() {
 
             const data = await response.json();
             if (response.ok) {
-                setMessage('✅ Signup successful!');
-                localStorage.setItem('user', JSON.stringify(data.user));
-                router.push(`/CompleteProfile?email=${formData.email}`);
+                setMessage('✅ Signin successful!');
+                router.push('/dashboard'); // Redirect to Dashboard
             } else {
-                setMessage(data.error || 'Signup failed');
+                setMessage(data.error || 'Signin failed');
             }
         } catch (error) {
             setMessage('⚠️ Error connecting to server');
-            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -43,19 +41,10 @@ export default function SignupForm() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
             <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md transition-all duration-300">
-                <h2 className="text-2xl font-semibold text-gray-800 text-center">Create an Account</h2>
-                <p className="text-gray-500 text-sm text-center">Sign up to get started</p>
+                <h2 className="text-2xl font-semibold text-gray-800 text-center">Sign In</h2>
+                <p className="text-gray-500 text-sm text-center">Welcome back! Please sign in.</p>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-5">
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Full Name"
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 p-3 rounded-lg text-black placeholder-gray-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300"
-                        required
-                    />
-
                     <input
                         type="email"
                         name="email"
@@ -81,7 +70,7 @@ export default function SignupForm() {
                         }`}
                         disabled={loading}
                     >
-                        {loading ? 'Signing up...' : 'Sign Up'}
+                        {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
 
@@ -92,9 +81,9 @@ export default function SignupForm() {
                 )}
 
                 <p className="mt-4 text-sm text-center text-gray-500">
-                    Already have an account?{' '}
-                    <a href="/Signin" className="text-blue-500 hover:underline">
-                        Log in
+                    Don't have an account?{' '}
+                    <a href="/signup" className="text-blue-500 hover:underline">
+                        Sign up
                     </a>
                 </p>
             </div>
