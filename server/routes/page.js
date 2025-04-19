@@ -9,6 +9,8 @@ import { removeStaff } from "../AuthController/page.js"; // Add `.js` extension
 import { addCommitteeMember } from "../AuthController/page.js"; // Add `.js` extension
 import { getCommitteeMembers } from "../AuthController/page.js"; // Add `.js` extension
 import { removeCommitteeMember } from "../AuthController/page.js"; // Add `.js` extension
+import { makeAnnouncement } from "../AuthController/page.js"; // Add `.js` extension
+import { getAnnouncements } from "../AuthController/page.js"; // Add `.js` extension
 const router = Router();
 
 router.post("/signup", signUp);
@@ -35,5 +37,6 @@ router.delete('/removeStaff/:staffId', removeStaff);
 router.post('/addCommitteeMember', addCommitteeMember);
 router.get('/getCommitteeMembers', getCommitteeMembers);
 router.delete('/removeCommitteeMember/:id', removeCommitteeMember);
-
+router.post("/announcements",makeAnnouncement);
+router.get("/getallannouncements", getAnnouncements ); // Assuming this is the correct endpoint for fetching announcements
 export default router;

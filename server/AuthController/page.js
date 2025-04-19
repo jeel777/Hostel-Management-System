@@ -557,8 +557,16 @@ export const getCommitteeMembers = async (req, res) => {
         const members = await prisma.hostelCommittee.findMany({
             orderBy: {
                 date_of_join: 'asc'
+            },
+            select: {
+                name: true,
+                position: true,
+                contact_number: true
             }
         });
+        res.status(200).json(members);
+        
+        console.log(members);
         res.status(200).json(members);
     } catch (error) {
         console.error(error);
@@ -710,5 +718,52 @@ export const getRoomAssignments = async (req, res) => {
     }
 };
 
+export const makeAnnouncement = async (req, res) => {
+    const { title, description, date } = req.body;
+
+    // Validate required fields
+    if (!title || !description || !date) {
+        return res.status(400).json({ error: "Please fill all the required fields" });
+    }
+
+    // Validate date format
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+    }
+
+    try {
+        const announcement = await prisma.annoncements.create({
+            data: {
+                title,
+                description,
+                date: parsedDate,
+            },
+        });
+
+        return res.status(201).json({
+            message: "Announcement created successfully",
+            announcement,
+        });
+    } catch (error) {
+        console.error("Error creating announcement:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getAnnouncements = async (req, res) => {
+    try {
+        const announcements = await prisma.annoncements.findMany({
+            orderBy: {
+                date: 'desc'
+            }
+        });
+
+        return res.status(200).json(announcements);
+    } catch (error) {
+        console.error("Error fetching announcements:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
 
 

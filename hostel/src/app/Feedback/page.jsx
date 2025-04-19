@@ -1,26 +1,23 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Feedback() {
     const [formData, setFormData] = useState({
-        student1_id: "",
         issue: "",
         room_number: "",
     });
 
     const [modal, setModal] = useState({ show: false, message: "", success: true });
     const router = useRouter();
+    const [studentId, setStudentId] = useState(""); // Store student ID separately
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const user = JSON.parse(storedUser);
-            setFormData((prevData) => ({
-                ...prevData,
-                student1_id: user.id || "",
-            }));
+            setStudentId(user.id || ""); // Set student ID from user object
         }
     }, []);
 
@@ -30,10 +27,21 @@ export default function Feedback() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!studentId) {
+            alert("Student ID is required. Please log in again.");
+            return;
+        }
+
+        const requestData = {
+            student1_id: studentId, // Include student_id in the request data
+            ...formData, // Other form data
+        };
+
         const response = await fetch("http://localhost:5000/api/createFeedback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(requestData),
         });
 
         const data = await response.json();
@@ -44,13 +52,13 @@ export default function Feedback() {
                 success: true,
             });
 
+            // Reset form data
             setFormData({
-                student1_id: formData.student1_id,
                 issue: "",
                 room_number: "",
             });
 
-            // Auto-redirect to dashboard after 2 seconds
+            // Redirect to /Dashboard after successful feedback submission
             setTimeout(() => {
                 router.push("/Dashboard");
             }, 2000);
@@ -67,13 +75,7 @@ export default function Feedback() {
         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-4">Submit Feedback</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    name="student1_id"
-                    value={formData.student1_id}
-                    readOnly
-                    className="w-full p-2 rounded bg-gray-700 text-white cursor-not-allowed"
-                />
+                {/* Removed student1_id input field */}
                 <input
                     type="text"
                     name="issue"

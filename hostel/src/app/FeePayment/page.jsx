@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function FeePayment() {
     const [formData, setFormData] = useState({
-        student_id: "",
         semester: "",
         date_of_payment: "",
         transaction_id: "",
@@ -14,15 +13,13 @@ export default function FeePayment() {
 
     const [modal, setModal] = useState({ show: false, message: "", success: true });
     const router = useRouter();
+    const [studentId, setStudentId] = useState(""); // Store student ID separately
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const user = JSON.parse(storedUser);
-            setFormData((prevData) => ({
-                ...prevData,
-                student_id: user.id || "",
-            }));
+            setStudentId(user.id || ""); // Set student ID from user object
         }
     }, []);
 
@@ -32,10 +29,21 @@ export default function FeePayment() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!studentId) {
+            alert("Student ID is required. Please log in again.");
+            return;
+        }
+
+        const requestData = {
+            student_id: studentId, // Include student_id in the request data
+            ...formData, // Other form data
+        };
+
         const response = await fetch("http://localhost:5000/api/createFeePayment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(requestData),
         });
 
         const data = await response.json();
@@ -46,14 +54,15 @@ export default function FeePayment() {
                 success: true,
             });
 
+            // Reset form data
             setFormData({
-                student_id: formData.student_id,
                 semester: "",
                 date_of_payment: "",
                 transaction_id: "",
                 mode_of_payment: "UPI",
             });
 
+            // Redirect to /Dashboard after successful fee payment
             setTimeout(() => {
                 router.push("/Dashboard");
             }, 2000);
@@ -70,13 +79,7 @@ export default function FeePayment() {
         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-4">Fee Payment</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    name="student_id"
-                    value={formData.student_id}
-                    readOnly
-                    className="w-full p-2 rounded bg-gray-700 text-white cursor-not-allowed"
-                />
+                {/* Removed student_id input field */}
                 <input
                     type="number"
                     name="semester"

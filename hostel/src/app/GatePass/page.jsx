@@ -1,11 +1,9 @@
-"use client";
-
+'use client';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function GatePass() {
     const [formData, setFormData] = useState({
-        student1_id: "",
         reason: "",
         leave_date: "",
         arrival_date: "",
@@ -13,17 +11,14 @@ export default function GatePass() {
     });
 
     const [modal, setModal] = useState({ show: false, message: "", success: true });
-    const router = useRouter();
+    const router = useRouter(); // Router for navigation
+    const [studentId, setStudentId] = useState(""); // Store studentId separately
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const user = JSON.parse(storedUser);
-            setFormData((prevData) => ({
-                ...prevData,
-                student1_id: user.id || "", // Using id from user object as student1_id
-
-            }));
+            setStudentId(user.id || ""); // Set student ID from user object
         }
     }, []);
 
@@ -33,25 +28,30 @@ export default function GatePass() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!formData.student1_id) {
+
+        if (!studentId) {
             alert("Student ID is required. Please log in again.");
             return;
         }
 
+        const requestData = {
+            student1_id: studentId, // Directly adding student1_id here
+            ...formData, // Other form data
+        };
+
         const response = await fetch("http://localhost:5000/api/createGatePass", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(requestData),
         });
 
         const data = await response.json();
         if (response.ok) {
-
             alert("Gate pass request submitted successfully!");
-            setFormData({ student1_id: formData.student1_id, reason: "", leave_date: "", arrival_date: "", approval: "Pending" });
+            setFormData({ reason: "", leave_date: "", arrival_date: "", approval: "PENDING" });
 
-           
+            // Redirect to /Dashboard after successful submission
+            router.push("/Dashboard");
         } else {
             setModal({
                 show: true,
@@ -65,13 +65,7 @@ export default function GatePass() {
         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-4">Request Gate Pass</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    name="student1_id"
-                    value={formData.student1_id}
-                    readOnly
-                    className="w-full p-2 rounded bg-gray-700 text-white cursor-not-allowed"
-                />
+                {/* Removed student1_id field from the form */}
                 <input
                     type="text"
                     name="reason"

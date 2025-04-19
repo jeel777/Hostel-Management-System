@@ -38,19 +38,7 @@ model Staff {
   roll_id       Int
   role          Role      @relation(fields: [roll_id], references: [role_id])
 }
-model MessMenu {
 
-    id        Int      @id @default(autoincrement())
-
-    day       String   // Monday, Tuesday, etc.
-
-    meal_type String   // Breakfast, Lunch, Hi-Tea, Dinner
-
-    items     String   // Comma-separated list of items
-
-    createdAt DateTime @default(now())
-
-}
 
 enum GenderEnum {
   MALE
@@ -146,4 +134,13 @@ model FeePayment {
   student_id    Int
 
   student Student1 @relation(fields: [student_id], references: [id])
+}
+
+model Annoncements {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

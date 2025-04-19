@@ -135,6 +135,21 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-bold">Add Staff Members</h3>
                     <p className="text-gray-300">Add Staff Members</p>
                 </div>
+                <div
+                    onClick={() => router.push("/makeAnnouncements")}
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">make all Announcements</h3>
+                    <p className="text-gray-300">Announcement section</p>
+                </div>
+                <div
+                    onClick={() => router.push("/getAllannouncements")}
+
+                    className="p-6 bg-gray-700 rounded-lg shadow cursor-pointer hover:bg-gray-600 transition text-center"
+                >
+                    <h3 className="text-lg font-bold">see Announcements</h3>
+                    <p className="text-gray-300">Announcement section</p>
+                </div>
             </div>
         </div>
     );
