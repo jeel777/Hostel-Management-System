@@ -42,7 +42,7 @@ export default function Dashboard() {
             {/* Welcome Message */}
             <div className="mt-8 w-full max-w-4xl bg-gray-800 p-6 rounded-lg shadow-lg text-center">
                 <h2 className="text-3xl font-semibold">
-                    Welcome, {user ? user.name : "Student"}!
+                    Welcome, {user ? user.name : "Student"}! Welcome to your Dashboard
                 </h2>
             </div>
 
